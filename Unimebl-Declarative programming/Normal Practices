@@ -1,0 +1,130 @@
+import Data.List
+import System.IO
+
+add:: Num a=> a ->a ->a
+add = (+)
+
+data Compass = North | East | South | West
+    deriving(Ord, Eq, Enum, Read, Show)
+
+data Expression = Number Int
+                 | Add Expression Expression
+                 | Substract Expression Expression
+                 deriving(Ord, Eq, Show)			 
+calculate :: Expression -> Int
+calculate(Number x) = x
+calculate(Add x y) = (calculate x) + (calculate y)
+calculate(Substract x y) = (calculate x) - (calculate y)
+
+newHead::[a] -> a
+newHead [] = error "empty list"
+newHead [a] = a 
+newHead (x:xs) = x
+
+newTail :: [a] -> [a]
+newTail [] = error"empty list"
+newTail (x:xs) = xs
+
+type CustomerID = Int
+type ReviewBody = String
+
+data BetterReview = BetterReview CustomerID ReviewBody
+
+is_even :: Int -> Bool
+--is_even = mod 2
+is_even x = x `mod` 2 == 0
+
+--W2
+data Font = Font (Maybe Int) (Maybe String) (Maybe Colour)
+            deriving Show
+
+data Colour = CName String  
+             |Chex [Char]
+	         |RGB Int Int Int
+			 deriving Show
+--W2Q3
+factorial :: Integer -> Integer
+factorial n
+       | n < 0 = error"less than 0"
+	   | n == 0 = 1
+	   |n > 0 = factorial (n-1) * n
+	    
+--W2Q4
+{-
+myElem :: (Eq a) => [a] -> a -> Bool
+myElem x list = case list of 
+      [] -> False
+      head:tail -> if head == x then True else myElem x tail 
+	  --head : tail 
+	  -}
+-- Norma Pratice
+--	w2	q5
+longestPrefix :: [Char] -> [Char] -> [Char]
+longestPrefix  [] _ = []
+longestPrefix  _ [] = []
+longestPrefix [] [] = error"both empty"
+longestPrefix (x:xs) (y:ys) 
+       | x==y      = x:longestPrefix xs ys
+       |otherwise  = []
+--W2Q6
+loop :: (Int,Int)->(Int,Int)
+loop (c,n)  
+	| c==0 =(c,n)
+	| otherwise = if n >100 then loop(c-1, n-10) else loop(c+1,n+11) 
+mccarthy_91 :: Int -> Int
+mccarthy_91 n = snd( loop(1,n) ) 
+
+	   
+main = do
+    putStrLn "What`s your name"
+    name <- getLine
+    putStrLn("Hello" ++ name)
+	
+times4 :: Int -> Int
+times4 x = x * 4
+
+listTimes4 = map times4 [1,2,3,4,5]
+
+mulBy4 :: [Int] -> [Int]
+mulBy4 []     =    []
+mulBy4 (x:xs) = times4 x : mulBy4 xs
+
+areStringEq :: [Char] -> [Char] -> Bool
+areStringEq [] [] = True
+areStringEq (x:xs) (y:ys) = x == y && areStringEq xs ys 
+
+getClass :: Int -> String
+getClass n = case n of 
+	5 -> "Go to Kinggarden"
+	6 -> "Go to elementary"
+	_ -> "high school"
+	
+data ShirtSize = S|M|L
+
+instance Eq ShirtSize where
+     S == S = True
+     M == M = True
+     L == L = True
+     _ == _ = False
+	  
+instance Show ShirtSize where
+      show S = "Small"
+      show M = "Medium"
+      show L = "Large"
+	  
+smallAvail = S `elem` [S,M,L]
+
+theSize = show S
+{-
+writeTofile = do
+       theFile <- openFile "test.txt" WriteMode
+	   hPutStrLn theFile ("Random line of text")
+	   hClose theFile
+
+readFromFile = do
+        theFile2 <- openFile "test.txt" ReadMode
+        contents <- hGetContents theFile2
+	    putStr contents
+	    hClose theFile2
+	-}
+fib = 1: 1: [a+b | (a,b) <- zip fib (tail fib)]
