@@ -1,0 +1,38 @@
+def binary_code(L,lo,hi):
+    rang = hi - lo + 1
+    if rang == 0:
+        print(L,lo,hi,"0Bits")
+    else:
+        try:  
+            bin_num = bin(rang)
+            bits = ceil(log(rang,2))
+        except BaseException:
+            print("math domain error", L,lo, hi)
+        else:
+            pack('>I',rang)
+            print(L,rang,":",bin_num, bits,": bits")
+def interpolative_code(L, start, end):
+    length = len(L)
+    if length == 0:
+        return
+    elif length == 1:
+        return binary_code(L,start,end)
+    else:
+        mid_term = int(floor(length / 2))
+        increase = mid_term 
+        decrease = length - mid_term - 1
+
+        L1, L2 = [], []
+        if mid_term - 1 == start:
+            L1 = L[0]
+        else:
+            L1 = L[:mid_term]
+        if mid_term + 1 == end:
+            L2 = L[-1]
+        else:
+            L2 = L[mid_term+1:]
+       
+        binary_code(L[mid_term],start + increase, end - decrease) 
+        interpolative_code(L1,start,L[mid_term]-1) 
+        interpolative_code(L2,L[mid_term]+1,end) 
+    return
