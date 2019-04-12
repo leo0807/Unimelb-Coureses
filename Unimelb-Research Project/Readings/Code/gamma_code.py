@@ -1,68 +1,63 @@
-def unray_single_encode(n):
+def unary_single_encode(n):
       if n < 0 or type(n) != int:
             return "input num must be positive integer"
-      elif n == 1:
-            return 0
+      elif n == 0:
+            return "0"
       else:
-            return(n-1)*"1"+"0"
-def unray_encode(n):
+            return n*"1"+"0"
+def unary_encode(n):
       new_list =[]
       if type(n) == list or type(n) == tuple:
             for num in n:
-                  new_list.append((num-1)*"1"+"0")
+                  new_list.append(unary_single_encode(num))
             return new_list
       else:
-            return unray_single_encode(n)
+            return unary_single_encode(n)
 #for single input
 def unary_single_decode(n):
       result = n.count("1")
       if result == 0:
-            return "1"
+            return 0
       else:
-            return result+1
+            return result
 # for list or tuple
-def unray_decode(n):
+def unary_decode(n):
       if type(n) == list or type(n) == tuple or type(n) == str:
             new = []
-            temp = 0
             for i in n:
-                  if i == "1":
-                        temp += 1
-                  else:
-                        temp += 1
-                        new.append(temp)
-                        temp = 0
-                  
+                new.append(unary_single_decode(i))
             return new
       elif type(n) != str:
             try:
-                  n = str(n)
+                n = str(n)
             except TypeError:
-                  print("TypeError")
+                 print("TypeError")
             else:
-                  return unary_single_decode(n)
+                return unary_single_decode(n)
       else:
-            return unary_single_decode(n)
+          return unary_single_decode(n)
 
 def gammaCode_encode(n):
     if type(n) == list or type(n) == tuple:
         result = []
         for num in n:
-            num = bin(num)[3:]
-            new = unray_encode(len(num))+num
+            binary = bin(num)[3:]
+            new = unary_encode(len(binary))+binary
             result.append(new)
     else:
-        n = str(n)
-        num = bin(num)[3:]
-        return unray_encode(len(num))+num
+        binary = bin(n)[3:]
+        return unary_encode(len(binary))+binary
     return result
 
 def gammaCode_decode(n):
     result_list = []
-    if type(n) == list or type(n) == tuple:
-        for term in n:
-            new = term.split("0",1)
-            result_list.append(int("1" + new[1], 2))
+    if type(n) == list or type(n) == tuple or type(n) == str:
+        while len(n) != 0:
+            new = n.split("0",1)
+            una_len = len(str(new[0]))
+            binary = "1" + n[una_len+1:2*una_len + 1]
+            result_list.append(int(binary, 2))
+            n = n[2 * una_len+1:]
     else:
         n = str(n)
         new = n.split("0",1)
