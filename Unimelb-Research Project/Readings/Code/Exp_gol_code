@@ -1,0 +1,36 @@
+def exp_golomb_encode(x, k = 0):
+      #Combine with three parts [MZeros][1][Info]
+      #prefix: M, mid :1, Suffix :M+k
+      if type(x)!= int and type(k) != int:
+            return "Invalid Imput Type"
+      else:
+            bin_x = bin(x)[2:]
+            length = len(bin_x)
+            if length < k:
+                  bin_x = (k - length) * '0' + bin_x
+            elif length == k:
+                  bin_x = '0'
+            else:
+                  bin_x = bin_x [ : (length - k)]
+            info = bin(int(bin_x, 2) + 1)[2:]
+            M = '0' * (len(info)-1) 
+            return M+info
+
+def exp_golomb_decode(x, k = 0):
+      M = 0
+      result = []
+      while len(x) != 0:
+            for index in range(len(x)):
+                  #decode = []
+                  if x[index] != '0':
+                        Codelen = 2 * index + k +1
+                        decode = x[index:Codelen]
+                        x = x[Codelen:]
+                        break
+            W = int(decode,2)- 2 ** k
+            result.append(W)
+      if len(result) > 1:
+            return result
+      else:
+            return result[0]
+      
