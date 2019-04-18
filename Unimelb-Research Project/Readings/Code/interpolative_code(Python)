@@ -1,27 +1,35 @@
+import gamma_code
+from exp_golomb_code import exp_golomb_encode, exp_golomb_decode
+from math import ceil,floor,log
 def binary_code(L,lo,hi):
     rang = hi - lo + 1
     if rang == 0:
         print(L,lo,hi,"0Bits")
+        return ""
     else:
-        try:  
-            bin_num = bin(rang)
-            bits = ceil(log(rang,2))
-        except BaseException:
-            print("math domain error", L,lo, hi)
-        else:
-            pack('>I',rang)
-            print(L,rang,":",bin_num, bits,": bits")
+          
+      scope = list(range(lo,hi+1))
+      if type(L) ==list:
+            L = L[0]
+      position = scope.index(L)
+      bin_position = bin(position)[2:]
+      bits = ceil(log(rang,2))
+      print(L,rang,":",bin_position, bits,":bits",type(bin_position))
+      #return bin_position
+      return exp_golomb_encode(position)
+            
+#def interpolative_code(L, start = L[0], end = L[-1]):            
 def interpolative_code(L, start, end):
     length = len(L)
     if length == 0:
-        return
+        return ""
     elif length == 1:
         return binary_code(L,start,end)
     else:
         mid_term = int(floor(length / 2))
-        increase = mid_term 
+        increase = mid_term
         decrease = length - mid_term - 1
-
+        
         L1, L2 = [], []
         if mid_term - 1 == start:
             L1 = L[0]
@@ -31,8 +39,40 @@ def interpolative_code(L, start, end):
             L2 = L[-1]
         else:
             L2 = L[mid_term+1:]
-       
-        binary_code(L[mid_term],start + increase, end - decrease) 
-        interpolative_code(L1,start,L[mid_term]-1) 
-        interpolative_code(L2,L[mid_term]+1,end) 
-    return
+    return  (binary_code(L[mid_term],start + increase, end - decrease)
+             + interpolative_code(L1,start,L[mid_term]-1)
+             + interpolative_code(L2,L[mid_term]+1,end) )    
+def former_three(L):
+    length = len(L)
+    start = L[0]
+    end = L[-1]
+    result_list = ( exp_golomb_encode(length) +
+                    exp_golomb_encode(start) +
+                    exp_golomb_encode(end) )
+#decode_list = interpolative_code(L, start, end)
+new_list = []  
+def interpolative_decode(L,length,start,end):
+    
+    if length == 0:
+        print(start+L,end)
+        return 
+    elif length == 1:
+        new_list.append(L[0] + start)
+        return 
+    else:
+        mid_term = floor(length / 2)
+        increase = mid_term
+        decrease = length - mid_term - 1
+        split = range(start + increase, end - decrease+1)[L[0]]
+        #print(split)
+        new_list.append(split)
+        L1, L2 = [], []
+        L1 = L[1:mid_term+1]
+        L2 = L[mid_term+1:]
+        if L2 == []:
+            L2 = L[-1]  
+        #print(L1,L2)
+        interpolative_decode(L1,increase,start,split-1)
+        interpolative_decode(L2,decrease,split+1,end)
+    
+    
