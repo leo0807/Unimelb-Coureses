@@ -15,3 +15,53 @@ colorify(A,B,C,D,E):-
 	colour(A),colour(B),colour(C),colour(D),colour(E),
 	\+ A=B,\+ A=C,\+ A=D,\+ A=E,
 	\+ C=B,\+ D= C,\+D=E.
+avg_temp(phx,100).
+avg_temp(sf,68).
+
+avg_temp_cels(Location,C_temp):-
+	avg_temp(Location,F_temp),
+	C_temp is (F_temp - 32) * 5/9.
+
+change(H,Q,D,N,P) :-
+	member(H,[0,1,2]),
+	member(Q,[0,1,2,3,4]),
+	member(D,[0,1,2,3,4,5,6,7,8,9,10]),
+	member(N,[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]),
+	
+ S is 50*H + 25*Q + 10*D + 5*N,
+ S =< 100,
+ P is 100 - S.
+ 
+ happy(vincent).
+ listens2music(butch).
+ playsAirGuitar(vincent):-listens2music(vincent),happy(vincent).
+ playsAirGuitar(butch):-happy(butch).
+ playsAirGuitar(butch):-listens2music(butch).
+ 
+ loves(remeo,juliet).
+ loves(juliet,remeo):-loves(remeo,juliet).
+ 
+ male(albert).
+ male(bob).
+ male(bill).
+ male(carl).
+ male(charlie).
+ male(dan).
+ male(edward).
+ 
+ female(alice).
+ female(besty).
+ female(diana).
+ 
+ happy(albert).
+ happy(alice).
+ happy(bob).
+ happy(bill).
+ with_albert(alice).
+ 
+ runs(albert):-
+	happy(albert).
+	
+dances(alice):-
+	happy(alice),
+	with_albert(alice).
