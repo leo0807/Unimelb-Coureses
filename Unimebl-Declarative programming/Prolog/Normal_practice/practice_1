@@ -1,0 +1,17 @@
+capitol(austrilia, canberra).
+capitol(france,paris).
+
+continent(austrilia,austrilia).
+continent(france,europe).
+
+population(austrilia,22_680_000).
+population(france,65_700_000).
+
+colour(red).
+colour(green).
+colour(blue).
+
+colorify(A,B,C,D,E):-
+	colour(A),colour(B),colour(C),colour(D),colour(E),
+	\+ A=B,\+ A=C,\+ A=D,\+ A=E,
+	\+ C=B,\+ D= C,\+D=E.
