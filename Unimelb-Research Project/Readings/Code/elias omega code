@@ -1,0 +1,17 @@
+def omega_encode(n):
+    s =""
+    if n > 1:
+        binary = bin(n)[2:]
+        n = len(binary) - 1
+        return omega_encode(n) + binary
+    else:
+        return "" 
+#return s
+# this encode method may not so perfct as it needs to append a '0' ar end of the string
+def omega_decode(s, n = 1):
+    if s[0]=="0":
+        return n
+    else:
+        m = int(s[:n+1], 2)
+        return omega_decode(s[n+1:], m)
+    
