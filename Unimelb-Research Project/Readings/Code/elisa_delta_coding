@@ -1,0 +1,25 @@
+from math import log, floor
+def delta_code(x):
+    if type(x) != int:
+        return "input is not int value"
+    if x < 1:
+        return "input must bigger than one"
+
+    n = floor(log(x,2))
+    l = floor(log((n + 1),2))
+    print(n,l) 
+    print()
+    return l * '0' + bin(n + 1)[2:] + bin(x)[3:]
+def delta_decode(x):
+    result = []
+    i = 0
+    while len(x) != 0:
+        new = x.split("1",1)
+        zero = len(new[0])
+        length = int(x[zero:2 * zero+1],2)
+        temp = int('1' + x[2*zero+1:2*zero+1+length-1],2)
+        result.append(temp)
+        x = x[2*zero+1+length-1:]
+    return result[0] if len(result) == 1 else result
+
+
