@@ -46,7 +46,7 @@ print(low, high,type(low))
 decode = ""
 for item in decode_interval.items():
     
-
+#
 def arith_encode(s = char_counts):
     low, high = 0, 1
     count_s = s 
