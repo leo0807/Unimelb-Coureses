@@ -1,0 +1,60 @@
+import nltk
+from nltk.corpus import *
+from collections import Counter
+from fractions import Fraction
+emma = gutenberg.words('austen-emma.txt')
+#print(emma)
+'''
+with open("input_file.txt","w", encoding = "utf-8") as input_file:
+    for i in emma:
+        input_file.write(i)
+        input_file.write(' ')
+'''   
+with open("input_file3.txt","r", encoding = 'utf-8') as f:
+    file = f.readlines()
+print(file,type(file),file[0])
+char_counts = Counter()
+s = ""
+for line in file:
+    s += line
+    char_counts += Counter(line)
+print(s[0])
+temp_key = sorted(dict(char_counts), key = dict(char_counts).get,reverse = True)
+store, decode_interval = {}, {}
+total= 0
+for k,v in char_counts.items():
+    store[k] = v
+    total += v
+cal = 0
+for k,v in store.items():
+    store[k] = Fraction(v,total)
+    temp = cal + store[k]
+    decode_interval[k] = cal, temp
+    cal += store[k]
+    #print(k,":",v,cal)
+
+print(decode_interval)
+
+low, high = Fraction(0,1), Fraction(1,1)
+
+for code in file[0]:
+    low += (high - low) * decode_interval[code][0]
+    high = low + (high - low) * decode_interval[code][1]
+    
+print(low, high,type(low))
+
+decode = ""
+for item in decode_interval.items():
+    
+
+def arith_encode(s = char_counts):
+    low, high = 0, 1
+    count_s = s 
+    #count_s = Counter(s)
+    temp_key = sorted(dict(count_s), key = dict(count_s).get, reverse = True)
+    temp_value = sorted(dict(count_s), key = dict(count_s).values(),reverse = True)
+    print(count_s)
+    print(temp_key)
+    print(temp_value)
+    total = len(s)
+    print(total)
