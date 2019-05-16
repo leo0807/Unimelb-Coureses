@@ -1,0 +1,57 @@
+import gamma_code
+from exp_golomb_code import exp_golomb_encode, exp_golomb_decode
+from math import ceil,floor,log
+def binary_code(L,lo,hi):
+    rang = hi - lo + 1
+    if rang == 0:
+        return "opopop"
+    else:   
+     # scope = list(range(lo,hi+1))
+      position = L - lo
+     # position = scope.index(L)
+     # print("f:",position,"lo:",lo,"hi:",hi)
+     # print("exp_golomb_encode:",exp_golomb_encode(position))
+     # print("decode:",exp_golomb_decode(exp_golomb_encode(position)))
+      return exp_golomb_encode(position)
+            
+           
+def interpolative_code(L,length,start, end):
+    if length == 0:
+        return ""
+    elif length == 1:
+        return binary_code(L[0],start,end)
+    else:
+        mid_term = int(floor(length / 2))
+        increase = mid_term
+        decrease = length - mid_term - 1
+       
+    return  (binary_code(L[mid_term],start + increase, end - decrease)
+             + interpolative_code(L[:mid_term],increase,start,L[mid_term]-1)
+             + interpolative_code(L[mid_term+1:],decrease,L[mid_term]+1,end) )    
+def former_three(L):
+    length = len(L)
+    start = L[0]
+    end = L[-1]
+    result_list = ( exp_golomb_encode(length) +
+                    exp_golomb_encode(start) +
+                    exp_golomb_encode(end) )
+#new_list = []  
+def interpolative_decode(L,length,start,end):
+    if length == 0:
+        #print(L,"length == 0",start,end)
+        return []
+    elif length == 1:
+       #new_list.append(start + L[0])
+        return [start + L[0]]
+    else:
+        mid_term = int(floor(length / 2))
+        increase = mid_term
+        decrease = length - mid_term - 1
+        #print(start + increase, end - decrease + 1,L[0])
+        split = start + increase + L[0]
+        #split = range(start + increase, end - decrease + 1)[L[0]]
+        # (new_list.append(split
+        #new_list.append(split)
+        return ([split] +
+                interpolative_decode(L[1:mid_term+1],increase,start,split-1) +
+                interpolative_decode(L[mid_term+1:],decrease,split+1,end) )
