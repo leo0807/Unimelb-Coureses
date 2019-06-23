@@ -1,0 +1,381 @@
+:- ensure_loaded(borders).
+:- ensure_loaded(cities).
+:- ensure_loaded(countries).
+:- ensure_loaded(rivers).
+% Student exercise profile
+:- set_prolog_flag(occurs_check, error).        % disallow cyclic terms
+:- set_prolog_stack(global, limit(8 000 000)).  % limit term space (8Mb)
+:- set_prolog_stack(local,  limit(2 000 000)).  % limit environment space
+
+lnf([],[]).
+lnf([X|Xs],Ys) :- X = 5, lnf(Xs,Ys).
+lnf([X|Xs],[X|Zs]) :- X \= 5, lnf(Xs,Zs).
+drop(N,List,Back):-
+    length(Front,N),
+    append(Front,Back,List).
+drop1(N,List,Back):-
+    append(Front,Back,List),
+    length(Front,N).
+square(N,N2):-
+    N2 is N*N.
+pu([],[]).
+pu([A,B|Xs],[A-B|Ps]) :- pu(Xs,Ps).
+
+take(N,List,Front):-
+    length(Front,N),
+    append(Front,_,List).
+
+take1(N,List,Front):-
+    append(Front,_,List),
+    length(Front,N).
+
+fact(N,F):- fact(N,1,F).
+fact(N,A,F):-
+    (N = 0 ->
+    	F = A  
+    ;   N > 0,
+    N1 is N - 1,
+    A1 is A * N,
+    fact(N1,A1,F)
+    ).
+
+ap(X,Y,Z):-
+    (X = [] ->  
+    	Z = Y
+    ;   X = [U|V],
+        ap(V,Y,W),
+        Z = [U|W]
+    ).
+
+
+multi(X,Y,XY):-
+    multi1(X,Y,0,XY).
+multi1(X,Y,A,XY):-
+    (X=0 -> 
+    	XY = A
+    ;   X1 is X - 1,
+        A1 is A + Y, 
+        multi1(X1,Y,A1,A1)
+    ).
+
+%flatten(Empty,List,List).
+
+
+
+filter(_,[],[]).
+filter(P,[X|Xs],Filtered):-
+    (   call(P,X) ->
+    	Filtered = [X|Filtered1]
+    ;   Filtered = Filtered1
+    ),
+    filter(P,Xs,Filtered1).
+
+len1([],N,N).
+len1([_|L],NO,N):-
+    N1 is NO + 1,
+    len1(L,N1,N).
+len2(L,N):-
+    (   N = 0 ->  
+    	L = []
+    ;   N1 is N - 1,
+        L = [_|L1],
+        len2(L1,N1)
+    ).
+
+len(L,N):-
+    (   integer(N) ->  
+    	len2(L,N)
+    ;   nonvar(N) ->  
+    	throw(error(type_error(integer,N),
+        context(len/2, '')))
+    ;   len1(L,0,N)).
+    
+
+country(C) :- country(C,_,_,_,_,_,_,_).
+
+larger(Country1, Country2):-
+    country(Country1,_,_,_,Area1,_,_,_),
+    country(Country2,_,_,_,Area2,_,_,_),
+    Area1 > Area2.
+
+river_country(River, Country):-
+    river(River, Countries),
+    member(Country,Countries),
+    country(Country).
+
+country_region(Country, Region):-
+    country(Country, Region,_,_,_,_,_,_).
+
+distinct_region(River):-
+    river_country(River, Country1),
+    river_country(River, Country2),
+    country_region(Country1, Region1),
+    country_region(Country2, Region2),
+    Region1 \= Region2.
+
+list_of(_,[]).
+list_of(H,[H|T]):- 
+    list_of(H,T).
+
+all_same([H|T]):-
+    list_of(H,[H|T]),!.
+%%Q3
+adjacent(E1,E2,List):-
+    append(_,[E1,E2|_],List).
+
+%%Q4
+adjacent2(E1,E2,[E1,E2|_]).
+adjacent2(E1,E2,[_|T]):-
+    adjacent2(E1,E2,T),!.
+
+member1(H,[H|_]).
+member1(H,[_|T]):-
+    member1(H,T),!.
+%%Q5
+before(E1,E2,[E1|T]):-
+    member(E2,T).
+before(E1,E2,[_|T]):-
+    before(E1,E2,T),!.
+%%Q6
+inset_mumber(N,tree(_,N,_)).
+inset_mumber(N1, tree(L,N,_)):-
+    N > N1,
+    inset_mumber(N1,L).
+inset_member(N2, tree(_, N, R)):-
+    N < N2,
+    inset_member(N2,R).
+
+inset_insert(N, empty, tree(empty,N ,empty)).
+inset_insert(N, tree(L,N,R), tree(L, N, R)).
+inset_insert(N, tree(L0,N0,R), tree(L,N0,R)):-
+    N < N0,
+    inset_insert(N, L0, L).
+inset_insert(N, tree(L,N0,R0), tree(L,N0,R)):-
+    N > N0,
+    inset_insert(N, R0, R).
+%%Week8
+%%Q1
+sumlist1([],0).
+sumlist1([N|Ns],Sum):-
+    sumlist1(Ns,Sum1),
+    Sum is N + Sum1.
+
+sumlist2([N|Ns],Sum):-
+    sumlist2([N|Ns], 0 ,Sum).
+sumlist2([],A,A).
+sumlist2([N|Ns],A,Sum):-
+    ( length([N|Ns],0) ->
+        Sum = A
+    ;   A1 is A + N,
+    sumlist2(Ns, A1, Sum)
+    ).
+greater(Pivot, X):- X > Pivot.
+quick_sort([],[]).
+quick_sort([H|Tail], Sorted):-
+    partition(greater(H), Tail, Larger, Smaller),
+    quick_sort(Smaller,Left),
+    quick_sort(Larger,Right),
+    append(Left,[H|Right],Sorted).
+%%Q2
+tree(empty).
+tree(node(Left,_,Right)) :-
+        tree(Left),
+        tree(Right).
+
+tree_list(empty, []).
+tree_list(node(Left,N,Right),List):-
+    tree_list(Left, List1),
+    tree_list(Right, List2),
+    append(List1,[N|List2],List).
+
+%%Q3
+
+tree_list2(Tree, List):-
+    tree_list2(Tree, List,[]).
+tree_list2(empty,[],[]).
+tree_list2(node(L,N,R),List,List2):-
+    tree_list2(L, List, List1),
+    List1 = [N|List3],
+    tree_list2(R, List3, List2).
+
+%%Q4
+list_tree([],empty).
+list_tree([E|List], node(Left, N, Right)):-
+    length(List, Len),
+    Len2 is Len // 2,
+    length(Front, Len2),
+    append(Front,[N|Back],[E|List]),
+    list_tree(Front,Left),
+    list_tree(Back,Right).
+
+%%Week9
+%%Q1
+same_elements([],[]).
+same_elements([_],[]).
+same_elements([],[_]).
+same_elements(L1,L2):-
+    ground(L1),
+    ground(L2),
+    all_in(L1,L2),
+    all_in(L2,L1).
+all_in([],_).
+all_in([H|T],L):-
+    member(H,L),
+    all_in(T,L),!.
+
+%%Q3
+
+same_elements2(L1,L2):-
+    ground(L1),
+    ground(L2),
+    sort(L1,X),
+    sort(L2,X).
+
+
+
+append2(X,Y,Z):-
+    ( X = [] ->
+        Z = Y
+    ;   X = [H|T],
+        append2(T,Y,W),
+        Z = [H|W]
+    ).
+
+multiply(X,Y,Z):-
+    multiply(X,Y,0,Z).
+
+multiply(X,Y,A,Z):-
+    (X = 0 ->
+        Z = A
+    ;   X1 is X - 1,
+        A1 is A + Y,
+        multiply(X1, Y, A1)
+    ).
+
+%%Find the last element
+last(X,[X]).
+last(X,[_|T]):-
+    last(X,T),!.
+
+%%Find 倒数第二个元素
+last_2(X,[X,_]).
+last_2(X,[_|T]):-
+    last_2(X,T).
+
+%%Find Kth element
+find_k(H,[H|_],0).
+find_k(H,[_|T],N):-
+    N1 is N - 1,
+    find_k(H, T, N1),!.
+
+%%Find the number of elements of a list
+num_list([],0).
+num_list([H|T],N):-
+    num_list([H|T], 0, N).
+num_list([],A,A).
+num_list([_|T],A,N):-
+    A1 is A + 1, 
+    num_list(T,A1,N).
+
+my_length([], 0).
+my_length([_|L],N):-
+    my_length(L,N1),
+    N is N1 + 1.
+
+%%05,Reverse a list.
+rev_list([],[]).
+rev_list(L1, L2):-
+    rev_list(L1,L2,[]).
+rev_list([], L2, L2).
+rev_list([H|T],L2,Temp):-
+    rev_list(T,L2,[H|Temp]),!.
+
+%%06 Panlindrome
+pan([]).
+pan([_]).
+pan(L):-
+    reverse(L,L).
+
+%%07 flatten a nested list structure
+my_flatten([],[]).
+my_flatten([H|T],X):-
+    my_flatten([H|T],[],X).
+my_flatten([],A,A).
+my_flatten([H|T],A,X):-
+    (   \+ is_list(H)  ->
+        append([H],A,A1)
+    ;   append(H,A,A1)
+    ),
+    my_flatten(T,A1,X).
+
+%%08 Eliminate consecutive duplicates of list elements.
+compress([],[]).
+compress([X],[X]).
+compress([X,X|Xs],Zs):- compress([X|Xs],Zs),!.
+compress([X,Y|Ys],[X|Zs]):-
+    X \= Y,
+    compress([Y|Ys], Zs),!.
+
+%% 09
+pack([],[]).
+pack([X],[[X]]).
+pack([X|Xs],[Z|Zs]) :- transfer(X,Xs,Ys,Z), pack(Ys,Zs).
+
+% transfer(X,Xs,Ys,Z) Ys is the list that remains from the list Xs
+%    when all leading copies of X are removed and transfered to Z
+
+transfer(X,[],[],[X]).
+transfer(X,[Y|Ys],[Y|Ys],[X]) :- X \= Y.
+transfer(X,[X|Xs],Ys,[X|Zs]) :- transfer(X,Xs,Ys,Zs).
+
+%%P14 (*) Duplicate the elements of a list.
+dupli([],[]).
+dupli([X|Xs],[X,X|Ys]) :-
+     dupli(Xs,Ys).
+
+%%P15 (**) Duplicate the elements of a list a given number of times.
+dupli2([],_,[]).
+dupli2(L1, N, L2):-
+    dupli2(L1, N, L2, N).
+dupli2([],_,[],_).
+dupli2([_|Xs],N,Ys,0):-
+    dupli2(Xs,N,Ys,N).
+dupli2([X|Xs],N,[X|Ys],K):-
+    K > 0,
+    K1 is K - 1,
+    dupli2([X|Xs],N,Ys,K1),!.
+
+%%P16 (**) Drop every N'th element from a list.
+drop2([],_,[]).
+drop2(L1, N, L2):-
+    drop2(L1, N, L2, N).
+
+drop2([],_,[],_).
+drop2([_|T],N,Y,1):-
+    drop2(T,N,Y,N).
+drop2([H|T],N,[H|T2],K):-
+    K > 1,
+    K1 is K - 1,
+    drop2(T,N,T2,K1).
+
+
+%%P17 (*) Split a list into two parts; the length of the first part is given.
+split([],_,[],[]).
+split(L,0,[],L).
+split([H|T], N, [H|T2], L2):-
+    N > 0,
+    N1 is N - 1,
+    split(T, N1,T2,L2),!.
+
+%%P20 (*) Remove the K'th element from a list.
+
+remove_at(H,[H|T],1,T).
+remove_at(X,[Y|Xs],K,[Y|Ys]) :- K > 1, 
+   K1 is K - 1, remove_at(X,Xs,K1,Ys).
+
+%%P21 (*) Insert an element at a given position into a list.
+insert_at(H,T,1,[H|T]).
+insert_at(X,[H|T],N,[H|Ys]):-
+    N > 1,
+    N1 is N - 1,
+    insert_at(X,T,N1,Ys).
