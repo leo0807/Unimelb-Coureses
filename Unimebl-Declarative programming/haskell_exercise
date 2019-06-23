@@ -1,0 +1,415 @@
+import Data.Char
+--module MaybeOKMonad where
+
+data MaybeOK a = OK a | Error String deriving (Show, Eq)
+
+instance Functor MaybeOK where
+    fmap _ (Error m) = Error m
+    fmap f (OK x) = OK (f x)
+
+instance Applicative MaybeOK where
+    pure = OK
+    (OK f) <*> (OK v) = OK (f v)
+    (OK _) <*> (Error m) = Error m
+    (Error m) <*> _ = Error m
+
+instance Monad MaybeOK where
+    (OK x) >>= k = k x
+    (Error m) >>=_ =  Error m
+    return         = OK
+    fail           = Error
+main :: IO()
+
+main = putStrLn(greet "World")
+
+greeting = "Howdy"
+greet who = greeting ++ ", " ++ who
+
+is_even:: Int -> Bool
+is_even x = if (mod x 2) == 0 then True else False
+
+is_pos::Int -> Bool
+is_pos x = if x > 0 then True else False
+
+is_long :: String -> Bool
+is_long x = length x > 3 
+zero:: Int -> [Int]
+zero n = [0..n]
+
+mult ::Int->(Int -> (Int ->Int))
+mult x y z = x*y*z
+
+factor::Int -> [Int]
+factor n =
+     [x|x <- [1..n], n`mod`x == 0]
+
+is_prime ::Int -> Bool
+is_prime n = factor n == [1,n]
+
+primes::Int ->[Int]
+primes n = [x|x <-[2..n], is_prime x]
+
+pairs::[a] ->[(a,a)]
+pairs xs = zip xs (tail xs)
+
+sorted::Ord a => [a] ->Bool
+sorted xs = 
+    and [x<= y|(x,y) <- pairs xs]
+
+positions :: Eq a => a -> [a] -> [Int]
+positions x xs = [i|(c, i) <- zip xs [0..n], x == c]
+    where n = length xs -1
+
+replicate::Int ->a ->[a]
+replicate n a = [a| _ <- [1..n]]
+
+riffle :: [a] -> [a] -> [a]
+riffle xs ys = concat[[x,y]| x<-xs,y<-ys]
+
+eval xs = foldl (\x y -> y + (10 * x)) 0 xs
+toDigits::Integer ->[Integer]
+toDigits = undefined
+
+prime1::[Int]
+prime1 = sieve [2..]
+sieve :: [Int] -> [Int]
+sieve (p:xs) = p : sieve[x|x<- xs, x `mod` p /= 0]
+inRange :: Ord a => (a,a) -> a -> Bool
+inRange (lo,hi) x = x >= lo && x < hi
+
+maybe_head::[a] ->MaybeOK a
+maybe_head [] = Error "head of empty list"
+maybe_head (x:_) = OK x
+
+maybe_sqrt::Double ->MaybeOK Double
+maybe_sqrt x = 
+    if x>= 0 then
+        OK(sqrt x)
+    else
+        Error "sqrt of negative number"
+
+maybe_sqrt_of_head :: [Double] -> MaybeOK Double
+maybe_sqrt_of_head l = 
+    let mh = maybe_head l in
+        case mh of
+            Error msg -> Error msg
+            OK h -> maybe_sqrt h
+
+maybe_sqrt_of_head l =
+    maybe_head l >>= maybe_sqrt
+
+hello ::IO()
+hello = putStr "Hello,"
+    >>=
+    \_-> putStrLn "world!"
+  
+  
+greet1 :: IO()
+greet1 = do
+    putStr "Greetings! What is your name?"
+    name <- getLine
+    putStr "Where are you from?"
+    town <- getLine
+    let msg = "Welcome, " ++ name ++ " from " ++ town
+    putStrLn msg
+
+
+countDown1::Int -> IO()
+countDown1 m  
+    | m < 0 = putStrLn "Done"
+    | otherwise = do
+      print m
+      countDown1 $ m - 1 
+
+countDown2 :: Int -> IO()
+countDown2 n = do
+    if n < 0 then do
+        putStrLn "Done."
+    else do
+        print n
+        countDown2 $ n - 1
+
+countDown3 :: Int -> IO()
+countDown3 n = 
+    if n < 0 then
+        putStrLn "Done."
+    else do
+        print n
+        countDown3 $ n - 1
+
+readLen :: IO Int
+readLen = do
+    str <- getLine
+    return (length str)
+
+foo :: IO()
+foo = do
+    return "Hello"
+    name <- getLine
+    putStrLn name        
+
+xor :: Bool -> Bool -> Bool
+xor False False = False
+xor _ _         = True
+
+append:: [a] -> [a] -> [a]
+append a [] = a
+append [] b = b
+append (x:xs) (y:ys) = x:append xs (y:ys)
+ 
+myReverse :: [a] -> [a]
+myReverse [] = []
+myReverse (x:xs) = myReverse xs ++ [x]
+
+getNthElem :: Num a => [a] -> Int -> [a]
+getNthElem [] _ = []
+getNthElem (x:xs) 0 = [x]
+getNthElem (x:xs) n = getNthElem xs (n - 1) 
+
+factorial :: Int -> Int
+factorial n 
+    | n < 0  =  error "Input cannot be negative number"
+    | n == 0 =  1
+    | otherwise = n * factorial(n - 1)
+     
+
+myElem::(Num a,Eq a) => a -> [a] -> Bool
+myElem a []    =  False
+myElem a (x:xs)  
+    | a == x = True
+    | otherwise = myElem a xs
+
+longestPrefix :: Eq a => [a] -> [a] -> [a]
+longestPrefix _ [] = []
+longestPrefix [] _ = []
+longestPrefix (x:xs) (y:ys)
+    | x == y = x:longestPrefix xs ys
+    | otherwise = []
+
+mccarthy_91::Int -> Int
+mccarthy_91 n = while((n, 1))
+
+while :: (Int, Int) -> Int
+--while = undefined
+while (n,c) 
+    | c /= 0 = if n> 100 then while (n-10,c-1) else while (n+11,c+1)
+    | otherwise = n
+
+
+min_to_max :: Int -> Int -> [Int]
+min_to_max m n 
+    | m == n = [m]
+    | m >  n = []
+    | otherwise = [m]++min_to_max (m+1) n  
+    
+ftoc :: Double -> Double
+ftoc a = (5/9) * (a - 32) 
+
+quadRoots::Double -> Double -> Double -> [Double]
+quadRoots 0 b c = error "a is negative number"
+quadRoots a b c 
+    |b*b-4*a*c == 0 = [(-1)*b / (2*a)]
+    |b*b-4*a*c >0   = [((-1)*b + sqrt(b*b-4*a*c))/2*a,((-1)*b + sqrt(b*b-4*a*c))/2*a]
+    |otherwise = error"The result of roor formulation is less than 0"
+
+merge :: Ord a => [a] -> [a] -> [a]
+merge [] ys = ys
+merge xs [] = xs
+merge (x:xs) (y:ys)
+    | x <= y = x : merge xs (y:ys)
+    | otherwise  = y : merge (x:xs) ys
+
+quicksort :: Ord a => [a] -> [a]
+quicksort [] = []
+quicksort (x:xs) = quicksort smaller ++ [x] ++ quicksort larger
+    where smaller = [a| a <- xs, a <= x]
+          larger  = [b| b <- xs, b > x]
+
+data Tree k v = Leaf | Node k v (Tree k v) (Tree k v)
+    deriving(Eq, Show)
+same_shape:: Tree a b -> Tree c d -> Bool
+same_shape Leaf Leaf = True
+same_shape Leaf (Node _ _ _ _) = False
+same_shape (Node _ _ _ _) Leaf = False
+same_shape (Node _ _ ll lr) (Node _ _ rl rr) =
+    same_shape ll lr && same_shape rl rr
+
+data Expression
+    = Var Variable
+    | Num Integer
+    | Plus Expression Expression
+    | Minus Expression Expression
+    | Times Expression Expression
+    | Div Expression Expression
+
+data Variable = A | B
+
+eval1 :: Integer -> Integer -> Expression -> Integer
+eval1 a b (Var A) = a
+eval1 a b (Var B) = b
+eval1 a b (Num e) = e
+eval1 a b (Plus e1 e2) = (eval1 a b e1) + (eval1 a b e2)
+eval1 a b (Minus e1 e2) = (eval1 a b e1) - (eval1 a b e2)
+eval1 a b (Times e1 e2) = (eval1 a b e1) * (eval1 a b e2)
+eval1 a b (Div e1 e2)
+    = (eval1 a b e1)`div`(eval1 a b e2)
+
+data Card = Card Class Rank
+    deriving Show
+ 
+data Class = Club | Diamond| Heart |Spade
+    deriving Show
+
+data Rank = Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|J|Q|K|Ace
+    deriving Show
+
+data Colour = Name String
+    |Hexidecimal Integer
+    |RGB (Int, Int, Int)
+    
+data Font_tag = Empty
+    |Size Integer
+    |Colour Colour 
+
+--data Tree1 a  = Leaf a  
+
+
+transpose :: [[Integer]] -> [[Integer]]
+transpose [[]] = [[]]
+transpose [(x:xs)] = [[x]] ++ transpose [xs]
+
+method1 ::Num a => [a] -> (Int,a,a)
+method1 [] = (0,0,0)
+method1 xs = (a,b,c)
+    where
+    a = length xs
+    b = sum xs
+    c = sum [t*t|t <- xs]
+
+maybeApply::(a -> b) -> Maybe a -> Maybe b
+maybeApply f Nothing = Nothing
+maybeApply f (Just a)= Just (f a)
+
+zWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+zWith f _ [] = []
+zWith f [] _ = []
+zWith f (x:xs) (y:ys) = (f x y): zWith f xs ys
+
+linearEqn :: Num a => a -> a -> [a] -> [a]
+linearEqn m n = map (\a -> m * a + n)
+
+sqrtPM :: (Floating a, Ord a) =>  a -> [a]
+sqrtPM x
+    | x > 0  = let y = sqrt x in [y, -y]
+    | x == 0 = [0]
+    | otherwise = []
+ 
+allSqrts :: (Floating a, Ord a) => [a] -> [a]
+allSqrts xs = concat (map sqrtPM xs)
+
+ans_a :: (Ord a, Floating a) => [a] -> [a]
+ans_a xs = map sqrt (filter (>=0) xs)
+
+ans_b :: (Ord a, Floating a) => [a] -> [a]
+ans_b (x:xs) = 
+    if x >=0 then sqrt x :ans_b xs
+        else ans_b xs
+
+
+transpose1 :: [[a]] -> [[a]]
+transpose1 [] = error "Need Higher Order Drgree"
+transpose1 [[]]    = []
+transpose1 ([]: _) = []
+transpose1 xs    = (map head xs) : transpose1 (map tail xs)
+
+listInsert :: Ord a => a -> [a] -> [a]
+listInsert a [] = [a]
+listInsert a (x:xs)
+    | a <= x = [a] ++ (x:xs)
+    | otherwise =  x: listInsert a xs
+
+
+data BoolExpr
+    = BoolConst Bool
+    | BoolOp BoolOp BoolExpr BoolExpr
+    | CompOp CompOp IntExpr IntExpr
+
+data IntExpr
+    = IntConst Int
+    | IntOp IntOp IntExpr IntExpr
+    | IntIfThenElse BoolExpr IntExpr IntExpr
+
+data BoolOp = And
+data CompOp = LessThan
+data IntOp = Pluses| Timeses
+
+boolEval :: BoolExpr -> Bool
+boolEval (BoolConst e1) = e1
+boolEval (BoolOp And e1 e2) = (boolEval e1) && (boolEval e2)
+boolEval (CompOp LessThan e1 e2) = (intEval e1) < (intEval e2)
+
+intEval :: IntExpr -> Int
+intEval (IntConst e1) = e1
+intEval (IntOp Pluses e1 e2) = (intEval e1) + (intEval e2)
+intEval (IntOp Timeses e1 e2) = (intEval e1) * (intEval e2)
+intEval (IntIfThenElse b e1 e2) =
+    if boolEval b then intEval e1 else intEval e2 
+-- week10
+--Q1
+maybe_tail :: [a] -> Maybe [a]
+maybe_tail [] = Nothing
+maybe_tail xs = Just (tail xs)
+    
+maybe_drop :: Int -> [a] -> Maybe [a]
+maybe_drop _ [] = Nothing
+maybe_drop 0 xs = Just xs
+maybe_drop n (x:xs)
+    | n > length (x:xs)  = Nothing
+    | n < 0          = error "N is a negative number"
+    | otherwise      = if (length (x:xs) - 1) > n then maybe_drop (n - 1) xs else maybe_tail (x:xs)
+
+
+maybe_drop2 :: Int -> [a] -> Maybe [a]
+maybe_drop2 0 xs = Just xs
+maybe_drop2 n xs | n > 0 = maybe_tail xs >>= maybe_drop2 (n - 1)
+--Q2
+data Tree2 a = Empty2 | Node2 (Tree2 a) a (Tree2 a)
+print_tree :: Show a => Tree2 a -> IO()
+print_tree Empty2 = return ()
+print_tree (Node2 l k r) = do
+    print k
+    print_tree l
+    print_tree r
+--Q3
+--import Data.Char
+
+accumulator:: String -> Int -> Maybe Int
+accumulator [] a = Just a
+accumulator (d:ds) a 
+    | isDigit d == True = accumulator ds (10 * a + digitToInt d)
+    | isDigit d == False= Nothing
+
+str_to_num:: String -> Maybe Int
+str_to_num [] = Nothing
+str_to_num (x:xs)
+    | isDigit x == False = Nothing
+    | isDigit x == True  = accumulator (x:xs) 0
+        
+
+my_sum:: Num a => [a] -> a
+my_sum [] = 0
+my_sum (x:xs) = x + (my_sum xs)
+
+my_product:: Num a => [a] -> a
+my_product [] = 1
+my_product (x:xs) = x * (my_product xs)
+
+filter_map :: (a -> Maybe b) -> [a] -> [b]
+filter_map = undefined
+
+data Tree3 a = Empty3 | Node3 (Tree3 a) a (Tree3 a)
+
+map_tree :: (a -> a) -> Tree3 a -> Tree3 a
+map_tree _ Empty3 = Empty3
+map_tree f (Node3 l n r) = Node3 (map_tree f l) (f n) (map_tree f r)
+
