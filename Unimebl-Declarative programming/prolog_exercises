@@ -379,3 +379,114 @@ insert_at(X,[H|T],N,[H|Ys]):-
     N > 1,
     N1 is N - 1,
     insert_at(X,T,N1,Ys).
+
+adjacent(E1,E2,[E1,E2|_]).
+adjacent(E1,E2,[_,H2|T]):-
+    adjacent(E1,E2,[H2|T]),!.
+
+%%adjacent2(E1,E2,[E1,E2|_]).
+adjacent2(E1, E2,List):-
+    append(_,[E1,E2|_],List).
+
+list_of(E,[E]).
+list_of(Elt,[Elt|T]):-
+    list_of(Elt,T),!.
+
+all_same([]).
+all_same([_]).
+all_same([H,H|T]):-
+    all_same([H|T]).
+
+before(E1, E2, [H|T]):-
+    (E1 =:= H ->
+    member(E2, T)
+    ;   before(E1,E2,T)
+    ).
+    
+same_elements([], []).
+same_elements(L1,L2):-
+    ground(L1),
+    ground(L2),
+    all_in(L1,L2),
+    all_in(L2,L1).
+
+all_in([],_).
+all_in([H|T],L):-
+    member(H,L),
+    all_in(T,L).
+
+same_elements2([],[]).
+same_elements2(L1,L2):-
+    sort(L1,X),
+    sort(L2,X).
+
+tree(empty).
+tree(node(L,_,R)):-
+    tree(L),
+    tree(R).
+
+ttree(nil).
+ttree(node(_, L, M, R)):-
+    ttree(L),
+    ttree(M),
+    ttree(R).
+
+
+shape(nil, nil).
+shaple(node(_, L1 ,M1, R1), node(_, L2, M2, R2)):-
+    shape(L1, L2),
+    shape(M1, M2),
+    shape(R1, R2).
+
+intset_member(N, tree(_,N,_)).
+intset_member(N, tree(L, N0, R)):-
+    (N < N0 ->
+        intset_member(N, L)
+    ;   intset_member(N, R)
+    ).
+
+intset_insert(N, empty, tree(empty, N, empty)).
+intset_insert(N, tree(L,N,R), tree(L, N, R)).
+intset_insert(N, tree(L, N0, R), tree(L0, N0, R0)):-
+    (N < N0 ->
+    intset_insert(N, L, L0)
+    ;   intset_insert(N, R, R0)
+    ).
+
+tree_list(empty,[]).
+tree_list(tree(L,H,R),List):-
+    tree_list(L,L1),
+    tree_list(R,L2),
+    append(L1,[H|L2],List).
+
+tree_to_list(Tree, List):-
+    tree_to_list(Tree, [] , List).
+
+tree_to_list(empty, List, List).
+tree_to_list(tree(L, N, R), A, List):-
+    tree_to_list(L, [N|List0], List),
+    tree_to_list(R, A, List0).
+
+reverese(L1, L2):-
+    reverese(L1, [], L2).
+reverese([], A, A).
+reverese([H|T], A, L2):-
+    reverese(T, [A|H], L2).
+
+flatten(empty, List, List).
+flatten(node(L, N, R), List, List0):-
+    flatten(L, List, [N|List1]),
+    flatten(R, List1, List0).
+ 
+map(_, [], []).
+map(P,[H1|T1],[H2|T2]):-
+    call(P, H1, H2),
+    map(P, T1, T2).
+
+filter(_, [], []).
+filter(P, [H1|T], L):-
+    (call(P, H1) ->
+        L = [H1|L1]     
+    ;   L = L1
+    ), 
+    filter(P,T,L1).
