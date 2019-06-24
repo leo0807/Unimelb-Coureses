@@ -413,3 +413,101 @@ map_tree :: (a -> a) -> Tree3 a -> Tree3 a
 map_tree _ Empty3 = Empty3
 map_tree f (Node3 l n r) = Node3 (map_tree f l) (f n) (map_tree f r)
 
+sublists::[a] -> [[a]]
+sublists [] = [[]]
+sublists (x:xs) = [x:sublist | sublist <- sublists xs] ++ sublists xs
+
+data Expr = Var Int | Num Double | BinoExpr Binop Expr Expr
+data Binop = Plus | Minus | Times | Div
+data Eqn = Eqn Int Binop Expr Expr
+
+flatten :: Expr -> Int -> ((Eqn,Expr), Int)
+flatten = undefined
+
+data Cord a = Nil | Leaf a | Branch (Cord a) (Cord a)
+
+c_len :: Cord a -> Int
+c_len Nil = 0
+c_len (Leaf _) = 1
+c_len (Branch l r) = (c_len l) + (c_len r)
+
+map_cord :: (a -> b) -> Cord a -> Cord b
+map_cord _ Nil = Nil
+map_cord f (Leaf a) = Leaf (f a)
+map_cord f (Branch l r ) = Branch (func l) (func r)
+    where func = map_cord f
+
+
+c_foldr :: (a -> b -> b) -> b -> Cord a ->  b
+c_foldr _ k Nil = k
+c_foldr f k (Leaf a) = k
+c_foldr f k (Branch l r) = c_foldr f (c_foldr f k r) l
+
+
+cord_to_list :: Cord a -> [a]
+cord_to_list Nil = []
+cord_to_list (Leaf a) = [a] 
+cord_to_list (Branch l r) = cord_to_list l ++ cord_to_list r
+
+--cl_foldr 
+
+data Ttree t = Nil1 | Node3 t (Ttree t) (Ttree t) (Ttree t)
+    deriving Show
+shape :: Ttree t -> Ttree t -> Bool
+shape Nil1 Nil1 = True 
+shape Nil1 (Node3 _ _ _ _) = False
+shape (Node3 _ _ _ _) Nil1 = False
+shape (Node3 _ l m r) (Node3 _ l1 m1 r1) =
+    (shape l l1) && (shape m m1) && (shape r r1)
+
+foldr_ttree :: (a -> b -> b) -> b -> Ttree a -> b
+foldr_ttree _ b Nil1 = b  
+foldr_ttree f b (Node3 t l m r) = 
+    f t (foldr_ttree f (foldr_ttree f (foldr_ttree f b r) m) l)
+
+foldr_2 :: (a ->b -> b) -> b -> Ttree a -> b 
+foldr_2 _ b Nil1 = b 
+foldr_2 f b (Node3 v l m r) = f v var 
+    where var = foldr_2 f base l
+          base = foldr_2 f base2 m
+          base2 = foldr_2 f b r
+
+data Range = Range Int Int 
+
+max_range :: Ttree t -> Range
+max_range Nil1 = Range 0 0
+
+--max_range (Node3 t l m r) = Range (foldr_ttree (:t) 0 l) (foldr_ttree (:t) 0 r) 
+
+average :: Ttree Double -> Double
+average Nil1 = 0.0
+average   a  = sum / count
+    where (sum, count) = helper a
+
+helper:: Ttree Double -> (Double, Double)
+helper Nil1 = (0.0, 0.0)
+helper (Node3 v l m r) = (v + sum_l + sum_m + sum_r, 1 + count_l + count_m + count_r)
+    where (sum_l, count_l) = helper l
+          (sum_m, count_m) = helper m
+          (sum_r, count_r) = helper r
+
+tree_to_list :: Num t => Ttree t -> [t]
+tree_to_list Nil1 = []
+tree_to_list (Node3 v l m r) = tree_to_list l ++ [v] ++ tree_to_list m ++ tree_to_list r 
+
+dec :: Int -> [t] -> [t]
+dec _ [] = []
+dec t x 
+    | t > (length x) = []
+    | otherwise = drop t x
+
+list_to_tree:: Num t => [t] -> Ttree t
+list_to_tree [] = Nil1
+list_to_tree x = 
+    (Node3 ((!!) x 0) (list_to_tree (dec 1 x)) (list_to_tree (dec 2 x)) (list_to_tree (dec 3 x)))
+
+transpose :: [[a]] -> [[a]]
+transpose [[]] = [[]]
+transpose ([]:_) = []
+transpose x = map head x : transpose (map tail x)
+
