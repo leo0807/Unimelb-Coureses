@@ -617,3 +617,15 @@ data Mtree a = Mnode a [Mtree a]
 
 map_Mtree :: (a -> b) -> Mtree a -> Mtree b
 map_Mtree f (Mnode a xs) = Mnode (f a) (map (map_Mtree f) xs)
+
+data Heap a = Empty | Node a (Heap a) (Heap a)
+   deriving Show
+
+remove_biggest :: (Num a, Ord a) => Heap a -> (a, Heap a)
+remove_biggest Empty = (0, Empty)
+remove_biggest (Node v Empty Empty) = (v, Empty)
+remove_biggest (Node v Empty r) = (v, r)
+remove_biggest (Node v l Empty) = (v, l)
+remove_biggest (Node v l@(Node v_l _ _) r@(Node v_r _ _)) = (v, (Node larger left right))
+    where (heap, left) = if v_l >= v_r then (l, r) else (r, l)
+          (larger, right) = remove_biggest heap
