@@ -511,3 +511,109 @@ transpose [[]] = [[]]
 transpose ([]:_) = []
 transpose x = map head x : transpose (map tail x)
 
+import Data.Char
+
+maybe_tail :: [a] -> Maybe [a]
+maybe_tail [] = Nothing
+maybe_tail x  = Just (tail x)
+
+maybe_drop :: Int -> [a] -> Maybe [a]
+maybe_drop n x
+    | length x > n = Nothing
+    | otherwise = Just (drop n x)
+
+maybe_drop1 :: Int -> [a] -> Maybe [a]
+maybe_drop1 0 x = Just x
+maybe_drop1 n (x:xs) = 
+    let mt = maybe_tail xs in 
+    case mt of 
+        Nothing -> Nothing
+        Just xs1 -> maybe_drop1 (n - 1) xs1
+
+maybe_drop2 :: Int -> [a] -> Maybe [a]
+maybe_drop2 0 xs = Just xs
+maybe_drop2 n xs | n > 0 = maybe_tail xs >>= maybe_drop2 (n-1)
+
+data Tree a = Empty | Node (Tree a) a (Tree a )
+
+data Ttree t = Nil | Node3 t (Ttree t) (Ttree t) (Ttree t) 
+
+foldr_tree :: (a -> b -> b) -> b -> Ttree a -> b
+foldr_tree _ b Nil = b
+foldr_tree f b (Node3 v l m r) =
+    f v (foldr_tree f (foldr_tree f (foldr_tree f b r) m) l)
+
+smaller :: [t] -> [t] -> [t]
+smaller a b 
+    | l_a <= l_b  = a
+    | otherwise   = b
+        where l_a = length a
+              l_b = length b 
+
+lists :: Ttree [t] -> ([t],[t])
+lists Nil = ([],[])
+lists (Node3 v l m r) = (shorteset, all_lists)
+    where shorteset = foldr_tree smaller v (Node3 v l m r)
+          all_lists = foldr_tree (++) [] (Node3 v l m r) 
+
+
+print_tree :: Show a => Tree a -> IO ()
+print_tree Empty = return ()
+print_tree (Node l v r) = do
+    print_tree l
+    print v
+    print_tree r
+
+transpose :: [[a]] -> [[a]]
+transpose [[]] = [[]]
+transpose ([]:_) = []
+transpose x  = map head x: transpose (map tail x)
+
+str_to_num :: String -> Maybe Int
+str_to_num [] = Nothing 
+str_to_num x = accumulator 0 x
+
+accumulator :: Int -> String -> Maybe Int 
+accumulator n [] = Just n
+accumulator n (x:xs) 
+    | isDigit x = accumulator (10 * n + digitToInt x) xs
+    | otherwise = Nothing
+
+
+foldl_tree :: (b -> a -> b) -> b -> Ttree a -> b 
+foldl_tree _ b Nil = b
+foldl_tree f b (Node3 v r m l) = 
+    foldl_tree f (foldl_tree f (foldl_tree f (f b v) r) m) l
+
+fib :: Int -> Integer 
+fib 0 = 1
+fib 1 = 1 
+fib n = fib (n-1) + fib (n-2)
+fib1 = 0:1:1:zipWith (+) fib1 (tail fib1)
+
+fibs :: Int -> [Integer]
+fibs n 
+    | n <= 0 = error "Input Error"
+    | otherwise = take n fib1
+
+map_tree :: (a -> b) -> Ttree a -> Ttree b
+map_tree _ Nil = Nil
+map_tree f (Node3 v l m r) = Node3 (f v) (map_tree f l) (map_tree f m) (map_tree f r)
+
+data Ltree a = LTLeaf a | LTBranch (Ltree a) (Ltree a)
+
+map_Ltree :: (a -> b) -> Ltree a -> Ltree b 
+map_Ltree f (LTLeaf a) = LTLeaf (f a)
+map_Ltree f (LTBranch a b) = LTBranch (map_Ltree f a) (map_Ltree f b)
+
+data Cord a = Nil1 | Leaf a | Branch (Cord a) (Cord a)
+
+map_Cord :: (a -> b) -> Cord a -> Cord b
+map_Cord _ Nil1 = Nil1
+map_Cord f (Leaf a) = Leaf (f a)
+map_Cord f (Branch a b) = Branch (map_Cord f a) (map_Cord f b)
+
+data Mtree a = Mnode a [Mtree a]
+
+map_Mtree :: (a -> b) -> Mtree a -> Mtree b
+map_Mtree f (Mnode a xs) = Mnode (f a) (map (map_Mtree f) xs)
